@@ -1,0 +1,189 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Page 1 - 1
+
+
+				Page	68,132
+				Title   PPETEST.asm
+
+
+				.286
+
+				;******************************************************
+				;*						      *
+				;*						      *
+				;*	  Parallel Port Exerciser		      *
+				;*						      *
+				;* This is an example of using dummy subroutines      *
+				;* to mock test the pc keyboard.  Creates PPET.COM    *
+				;*						      *
+				;*						      *
+				;******************************************************
+
+
+
+ 0000				cseg	segment 'code'
+				assume	cs:cseg,  ds:cseg,  ss:cseg, es:cseg
+
+
+
+
+				        org      100h            ;Leave room for PSP
+
+
+ 0100				start:
+ 0100  90			        nop			 ;Main program
+ 0101  E8 0024				call clsub   	         ;call clear subroutine
+ 0104  E8 002A			       	call Greet   	         ;call Greet subroutine
+ 0107				nextkey:
+ 0107  E8 002F			        call getkey		 ;call getkey subroutine
+ 010A  8D 16 025A R		        lea dx, keymesg          ;display "You pressed "
+ 010E  E8 003C				call show   	         ;call display subroutine
+ 0111  E8 002F			        call dispkey             ;call display subroutine to print key pressed
+ 0114  A0 0269 R		        mov al, [keynum]         ;get ascii key value of key pressed
+ 0117  3C 71			       	cmp al, 71h              ;test to see if the key is "q"
+ 0119  74 02				jz done                  ;if key is "q" jump to done
+ 011B  EB EA				jmp nextkey              ;if not "q" jump back to nextkey
+ 011D				done:
+ 011D  8D 16 023C R		        lea dx, ending 		 ;load dx with the location of mesg2
+ 0121  E8 0029				call show   	         ;call display subroutine
+ 0124  B4 4C				mov ah, 4ch
+ 0126  CD 21			        int 21h
+
+ 0128				clsub:
+ 0128  90			        nop			 ;Clear subroutine
+ 0129  B8 0002				mov      ax,0002         ;BIOS service 0, video mode 2
+ 012C  CD 10				int      10h             ;Set video mode and clear screen
+ 012E  B4 02				mov      ah,2            ;BIOS service 2
+ 0130  C3				ret
+
+
+ 0131				Greet:
+ 0131  8D 16 0200 R		        lea dx, mtitle		 ;load dx with the location of mtitle
+ 0135  E8 0015				call show   	         ;call display subroutine
+ 0138  C3				ret
+
+
+ 0139				getkey:
+ 0139  60			        pusha
+ 013A  B4 00			        mov ah, 00h
+ 013C  CD 16			        int 16h
+ 013E  A2 0269 R		        mov [keynum], al
+ 0141  61			        popa
+ 0142  C3			        ret
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Page 2 - 1
+
+
+
+ 0143				dispkey:
+ 0143  60			        pusha
+ 0144  A0 0269 R		        mov al, [keynum]
+ 0147  B4 0E			        mov ah, 0eh
+ 0149  CD 10			        int 10h
+ 014B  61			        popa
+ 014C  C3			        ret
+
+
+
+				;************************************
+				;*     Procedure Show		    *
+				;*				    *
+				;* Function: Display ASCII message  *
+				;*	     terminated with $	    *
+				;* Inputs:   DX points to message   *
+				;* Calls:    DOS INT 21 service 09H *
+				;* Modifys:  flags		    *
+				;				    *
+				;************************************
+
+ 014D				show	proc
+
+ 014D  60				pusha				;Save all registers
+ 014E  B4 09				mov	ah,09			;DOS function: string output
+ 0150  CD 21				int	21h
+ 0152  61				popa				;Restore registers
+ 0153  C3				ret
+
+ 0154				show	endp
+
+
+
+
+
+
+
+
+					org 200h
+ 0200 0D 0A 50 61 72 61		mtitle	db 13,10, "Parallel Port Exerciser Tester"
+       6C 6C 65 6C 20 50
+       6F 72 74 20 45 78
+       65 72 63 69 73 65
+       72 20 54 65 73 74
+       65 72
+ 0220  0D 0A 20 20 20 20	        db 13,10, "    [press 'q' to quit]",13,10,"$"
+       5B 70 72 65 73 73
+       20 27 71 27 20 74
+       6F 20 71 75 69 74
+       5D 0D 0A 24
+
+ 023C 0D 0A 45 6E 64 69		ending	db 13,10, "Ending PPE Tester Program",13,10, "$"
+       6E 67 20 50 50 45
+       20 54 65 73 74 65
+       72 20 50 72 6F 67
+       72 61 6D 0D 0A 24
+ 025A 0D 0A 59 6F 75 20		keymesg db 13,10, "You pressed ", "$"
+       70 72 65 73 73 65
+       64 20 24
+ 0269 00			keynum	db  ?
+ 026A				cseg	ends
+					end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Page 3 - 1
+
+
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Symbols 4 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 026A	  Para	  Private 'CODE'	
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Symbols 5 - 1
+
+
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+show . . . . . . . . . . . . . .	P Near	 014D	  cseg	Length= 0007 Public
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/02/03 11:56:59
+PPETEST.asm						     Symbols 6 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+Greet  . . . . . . . . . . . . .	L Near	 0131	  cseg	
+clsub  . . . . . . . . . . . . .	L Near	 0128	  cseg	
+dispkey  . . . . . . . . . . . .	L Near	 0143	  cseg	
+done . . . . . . . . . . . . . .	L Near	 011D	  cseg	
+ending . . . . . . . . . . . . .	Byte	 023C	  cseg	
+getkey . . . . . . . . . . . . .	L Near	 0139	  cseg	
+keymesg  . . . . . . . . . . . .	Byte	 025A	  cseg	
+keynum . . . . . . . . . . . . .	Byte	 0269	  cseg	
+mtitle . . . . . . . . . . . . .	Byte	 0200	  cseg	
+nextkey  . . . . . . . . . . . .	L Near	 0107	  cseg	
+start  . . . . . . . . . . . . .	L Near	 0100	  cseg	
+
+	   0 Warnings
+	   0 Errors

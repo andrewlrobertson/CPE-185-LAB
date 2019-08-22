@@ -1,0 +1,78 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/06/03 08:21:25
+PPE							     Page 1 - 1
+
+
+				Page	58,132
+				Title	PPE
+
+
+				;*
+				;* Test program for PPE card
+				;*
+
+
+ 0000				   cseg	segment 'code'
+					assume	cs:cseg, ds:cseg, ss:cseg, es:cseg
+
+					ORG 0100h
+ 0100  BA 0378			START:	MOV DX,0378h	;setup output port
+ 0103  B0 01				MOV AL,01h	;looking for 1,2,3
+ 0105  EE				OUT DX,AL	;enable the 1,2,3 row
+ 0106  BA 0379				MOV DX,0379h	;setup input port
+ 0109  EC				IN  AL,DX	;get input data
+ 010A  8A E0				MOV AH,AL	;save the key data
+ 010C  3C 3F				CMP AL,3Fh	;Nothing Pressed
+ 010E  74 F0				JZ  START
+ 0110  24 08				AND AL,08h	;looking for #1 pressed in bit D3
+ 0112  74 0E				JZ  ONE
+ 0114  8A C4				MOV AL,AH	;get saved input key data
+ 0116  24 10				AND AL,10h	;looking for #2 pressed in bit D3
+ 0118  74 0C				JZ  TWO
+ 011A  8A C4				MOV AL,AH	;get saved input key data
+ 011C  24 20				AND AL,20h	;looking for #3 pressed in bit D3
+ 011E  74 0A				JZ  THREE
+ 0120  EB DE				JMP START
+
+ 0122  B3 01			ONE:	MOV BL,01h
+ 0124  EB 08				JMP BYE
+
+ 0126  B3 02			TWO:	MOV BL,02h
+ 0128  EB 04				JMP BYE
+
+ 012A  B3 03			THREE:	MOV BL,03h
+ 012C  EB 00				JMP BYE
+
+ 012E  B4 4C			BYE:	mov ah, 4ch
+ 0130  CD 15				INT 21
+
+ 0132				cseg	ends
+					end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/06/03 08:21:25
+PPE							     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 0132	  Para	  Private 'CODE'	
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/06/03 08:21:25
+PPE							     Symbols 3 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+BYE  . . . . . . . . . . . . . .	L Near	 012E	  cseg	
+ONE  . . . . . . . . . . . . . .	L Near	 0122	  cseg	
+START  . . . . . . . . . . . . .	L Near	 0100	  cseg	
+THREE  . . . . . . . . . . . . .	L Near	 012A	  cseg	
+TWO  . . . . . . . . . . . . . .	L Near	 0126	  cseg	
+
+	   0 Warnings
+	   0 Errors

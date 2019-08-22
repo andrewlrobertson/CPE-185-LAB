@@ -1,0 +1,200 @@
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Page 1 - 1
+
+
+				TITLE     	BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION
+				PAGE 	60,132
+
+
+				;---------------------------------------------------------------;
+				;								;
+				;	This is an example program of BCD Addition		;
+				;	Two numbers in ASCII are converted to BCD		;
+				;	Added with the result in BCD, and then converted	;
+				;	to ASCII.   						;
+				;	 							;
+				;								;
+				;---------------------------------------------------------------;
+
+
+				.MODEL SMALL
+
+				.STACK 64
+
+				;--------------
+ 0000				.DATA
+ 0000 30 36 34 39 31 34		   NUM1_ASC 	DB 		'0649147816'
+       37 38 31 36
+				             		ORG 	0010H
+ 0010 30 30 37 32 36 38		   NUM2_ASC 	DB		'0072687188'
+       37 31 38 38
+				             		ORG	0020H
+ 0020  0005 [			   NUM1_BCD	DB		5 DUP (?)
+        00
+       ]
+				             		ORG	0030H
+ 0030  0005 [			   NUM2_BCD	DB		5 DUP (?)
+        00
+       ]
+				             		ORG	0040H
+ 0040  0005 [			   Result_ADD 	DB		5 DUP (?)
+        00
+       ]
+				             		ORG	0050H
+ 0050  000A [			   Result_ASC 	DB		10 DUP (?)
+        00
+       ]
+
+
+				;--------------
+ 0000				.CODE
+ 0000				MAIN       PROC    FAR
+ 0000  B8 ---- R		           MOV     AX,@DATA
+ 0003  8E D8			           MOV     DS,AX
+ 0005  BB 0000 R		           MOV     BX,OFFSET NUM1_ASC      ;BX points to first ASCII data
+ 0008  BF 0020 R		           MOV     DI,OFFSET NUM1_BCD      ;DI points to first BCD data
+ 000B  B9 000A			           MOV     CX,10                   ;CX holds number bytes to convert
+ 000E  E8 001F			           CALL    CONV_BCD                ;convert ASCII to BCD
+ 0011  BB 0010 R		           MOV     BX,OFFSET NUM2_ASC      ;BX points to second ASCII data
+ 0014  BF 0030 R		           MOV     DI,OFFSET NUM2_BCD      ;DI points to second BCD data
+ 0017  B9 000A			           MOV     CX,10                   ;CX holds number bytes to convert
+ 001A  E8 0013			           CALL    CONV_BCD                ;convert ASCII to BCD
+ 001D  E8 0028			           CALL    BCD_ADD                 ;add the BCD operands
+ 0020  BE 0040 R		           MOV     SI,OFFSET Result_ADD    ;SI points to BCD result
+ 0023  BF 0050 R		           MOV     DI,OFFSET Result_ASC    ;DI points to ASCII result
+ 0026  B9 0005			           MOV     CX,05                   ;CX holds count for convert
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Page 2 - 1
+
+
+ 0029  E8 0039			           CALL    CONV_ASC                ;convert result to ASCII
+ 002C  B4 4C			           MOV     AH,4CH
+ 002E  CD 21			           INT     21H                     ;go back to DOS
+ 0030				MAIN       ENDP
+
+
+				;---------------
+				;THIS SUBROUTINE CONVERTS ASCII TO PACKED BCD
+
+ 0030				CONV_BCD   PROC
+ 0030  8B 07			AGAIN:     MOV     AX,[BX] ;BX=pointer for ASCII data
+ 0032  86 E0			           XCHG    AH,AL
+ 0034  25 0F0F			           AND     AX,0F0FH        ;mask ASCII 3s
+ 0037  51			           PUSH    CX              ;save the counter
+ 0038  B1 04			           MOV     CL,4            ;shift AH left 4 bits
+ 003A  D2 E4			           SHL     AH,CL           ;  to get ready for packing
+ 003C  0A C4			           OR      AL,AH           ;combine to make packed BCD
+ 003E  88 05			           MOV     [DI],AL         ;DI=pointer for BCD data          
+ 0040  83 C3 02			           ADD     BX,2            ;point to next 2 ASCII bytes
+ 0043  47			           INC     DI              ;point to next BCD data
+ 0044  59			           POP     CX              ;restore loop counter
+ 0045  E2 E9			           LOOP    AGAIN
+ 0047  C3			           RET
+ 0048				CONV_BCD   ENDP
+
+
+
+				;---------------
+ 0048				BCD_ADD   PROC
+ 0048  BB 0020 R		          MOV    BX,OFFSET NUM1_BCD     ;BX=pointer for operand 1
+ 004B  BF 0030 R		          MOV    DI,OFFSET NUM2_BCD     ;DI=pointer for operand 2
+ 004E  BE 0040 R		          MOV    SI,OFFSET Result_ADD     ;SI=pointer for sum   
+ 0051  B9 0005			          MOV    CX,05
+ 0054  F8			          CLC
+ 0055  8A 47 04			BACK:     MOV    AL,[BX]+4       ;get next byte of operand 1
+ 0058  12 45 04			          ADC    AL,[DI]+4       ;add next byte of operand 2
+ 005B  27			          DAA                    ;correct for BCD addition
+ 005C  88 44 04			          MOV    [SI] +4,AL      ;save sum   
+ 005F  4B			          DEC    BX              ;point to next byte of operand 1
+ 0060  4F			          DEC    DI              ;point to next byte of operand 2
+ 0061  4E			          DEC    SI              ;point to next byte of sum
+ 0062  E2 F1			          LOOP   BACK
+ 0064  C3			          RET
+ 0065				BCD_ADD   ENDP
+
+
+				;---------------
+				;THIS SUBROUTINE CONVERTS FROM PACKED BCD TO ASCII
+
+ 0065				CONV_ASC  PROC
+ 0065  8A 04			AGAIN2:   MOV     AL,[SI]         ;SI=pointer for BCD data 
+ 0067  8A E0			          MOV     AH,AL           ;duplicate to unpack
+ 0069  25 F00F			          AND     AX,0F00FH       ;unpack
+ 006C  51			          PUSH    CX              ;save counter
+ 006D  B1 04			          MOV     CL,04           ;shift right 4 bits to unpack
+ 006F  D2 EC			          SHR     AH,CL           ;    the upper nibble
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Page 3 - 1
+
+
+ 0071  0D 3030			          OR      AX,3030H        ;make it ASCII
+ 0074  86 E0			          XCHG    AH,AL           ;swap for ASCII storage convention
+ 0076  89 05			          MOV     [DI],AX         ;store ASCII data          
+ 0078  46			          INC     SI              ;point to next BCD data
+ 0079  83 C7 02			          ADD     DI,2            ;point to next ASCII data
+ 007C  59			          POP     CX              ;restore loop counter
+ 007D  E2 E6			          LOOP    AGAIN2
+ 007F  C3			          RET
+ 0080				CONV_ASC  ENDP        
+
+
+				          END     MAIN
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Symbols 4 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 005A	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0040	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0080	  Word	  Public  'CODE'	
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Symbols 5 - 1
+
+
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+BCD_ADD  . . . . . . . . . . . .	P Near	 0048	  _TEXT	Length= 001D Public
+  BACK . . . . . . . . . . . . .	L Near	 0055	  _TEXT	
+CONV_ASC . . . . . . . . . . . .	P Near	 0065	  _TEXT	Length= 001B Public
+  AGAIN2 . . . . . . . . . . . .	L Near	 0065	  _TEXT	
+CONV_BCD . . . . . . . . . . . .	P Near	 0030	  _TEXT	Length= 0018 Public
+  AGAIN  . . . . . . . . . . . .	L Near	 0030	  _TEXT	
+MAIN . . . . . . . . . . . . . .	P Far	 0000	  _TEXT	Length= 0030 Public
+Microsoft (R) Macro Assembler Version 6.13.7299		    04/11/02 12:16:24
+BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION	     Symbols 6 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+NUM1_ASC . . . . . . . . . . . .	Byte	 0000	  _DATA	
+NUM1_BCD . . . . . . . . . . . .	Byte	 0020	  _DATA	
+NUM2_ASC . . . . . . . . . . . .	Byte	 0010	  _DATA	
+NUM2_BCD . . . . . . . . . . . .	Byte	 0030	  _DATA	
+Result_ADD . . . . . . . . . . .	Byte	 0040	  _DATA	
+Result_ASC . . . . . . . . . . .	Byte	 0050	  _DATA	
+
+	   0 Warnings
+	   0 Errors

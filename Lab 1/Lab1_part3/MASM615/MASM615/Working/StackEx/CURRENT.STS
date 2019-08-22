@@ -1,0 +1,31 @@
+[shared-]
+	pmark="A:\MASM613\WORKING\STACKEX\stack.asm" 6 1
+	version=3
+[debug-]
+	target="a:\masm613\working\stackex\stack.com"
+	synonym=;A:\MASM613\WORKING\STACKEX
+	srcwin=vs1+ /a+b+c+l+s+t+
+	memwin=vm1b 0x1D42:0xFFFF 
+[cv]
+	wndstate=0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1
+	wndstate=1 33 9 0 1 0 0 0 0 0 0 0 0 0 -1
+	wndstate=2 34 9 33 1 0 0 0 0 0 0 0 0 0 -1
+	wndstate=3 67 30 0 1 0 1 0 0 0 5 0 0 0 -1
+	wndstate=4 67 12 3 13 0 0 0 0 0 0 0 0 0 -1
+	wndstate=5 67 9 0 31 0 1 0 0 0 5042 5042 0 0 -1
+	wndstate=6 67 9 3 25 0 0 0 0 0 0 0 0 0 -1
+	wndstate=7 13 48 67 1 0 1 0 0 0 0 0 0 0 -1
+	wndstate=8 67 9 0 31 0 0 0 0 0 0 0 0 0 -1
+	wndstate=9 67 10 0 39 1 1 0 1 0 1 0 0 0 -1
+	command=use auto
+	command=n10
+	screensize=50
+	command=oh+
+	command=ov+
+	command=oa+
+	command=oc+
+	command=of+
+	command=o3-
+	command=ollf   
+	tracespeed=250
+	callargs=1

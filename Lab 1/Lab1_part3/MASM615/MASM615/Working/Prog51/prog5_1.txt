@@ -1,0 +1,14 @@
+a100
+;Program 5.1
+mov     ax,0002         ;BIOS service 0, video mode 2
+int     10              ;Set video mode and clear screen
+mov     ah,2            ;BIOS service 2
+mov     dx,0a00         ;Row 10, column 0
+mov     bh,0            ;Page 0
+int     10              ;Position cursor
+mov     ax,0e00         ;BIOS service 0E, first character 0
+int     10              ;Print character
+inc     al              ;Next
+cmp     al,80           ;Done?
+jnz     0111            ;No: loop again
+int     20              ;Yes: back to DOS

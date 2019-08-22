@@ -1,0 +1,213 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/05/02 21:13:30
+BCD_BOOK.ASM						     Page 1 - 1
+
+
+				;JIAO JING HUANG
+				;BANKING PROGRAM
+				;========================================================
+				.8086
+				;========================================================
+ 0000				SSEG SEGMENT STACK
+ 0000  0020 [				DB 32 DUP (?)		  ;32 BYTE FOR STACK
+        00
+       ]
+ 0020				SSEG ENDS
+				;========================================================
+ 0000				DSEG SEGMENT
+				ORG 0202H
+ 0202  0003 [			BUFF DB 3 DUP (?)		   ;8 BYTE INPUT BUFFER
+        00
+       ]
+ 0205				DSEG ENDS
+				;========================================================
+ 0000				CSEG SEGMENT 'CODE'
+				;ASSUME CS:CSEG, DS:DSEG, SS:SSEG
+				;ORG 100H
+				;========================================================
+ 0000  E8 00A6			MAIN: CALL CLEARSCREEN		;CLEAR SCREEN
+ 0003  B4 09			      MOV AH, 09H
+ 0005  BA 0353 R		      MOV DX, OFFSET WELCOME	;DISPLAY WELCOME MSG
+ 0008  CD 21			      INT 21H			; CALL DOS
+ 000A  BA 037A R		      MOV DX, OFFSET PINMSG	;ASK USER TO ENTER THEIR PIN
+ 000D  CD 21			      INT 21H			;CALL DOS
+ 000F  BA 0300 R		      MOV DX, OFFSET BALANCEAMT ;ASK USER TO ENTER CURRENT BALANCE
+ 0012  CD 21			      INT 21H			;CALL DOS
+ 0014  B8 00CA			      MOV AX, [0202]		;GET ADDRESS OF DATA SEGMENT
+ 0017  8E D8			      MOV DS, AX		;AND STORE IN DS
+ 0019  8D 16 0202 R		      LEA DX, BUFF		;POINT DX AT INPUT BUFFER
+ 001D  B4 0A			      MOV AH, 0AH		;DOS FUNCTION 0AH
+ 001F  8B F2			      MOV SI, DX		;POINT SI AT INPUT BUFFER
+ 0021  C6 04 03			      MOV BYTE PTR [SI], 3H	;3 BYTE BUFFER
+ 0024  CD 21			      INT 21H			;GET THE TWO NUMBER
+ 0026  B4 0E			      MOV AH, 0EH		;BIOS VIDEO SERVICE
+ 0028  B0 0A			      MOV AL, 0AH		;ASCII LINE FEED
+ 002A  CD 10			      INT 10H
+ 002C  80 6C 02 30		      SUB BYTE PTR [SI+2], 30H	;COVERT EACH DIGIT TO BCD
+ 0030  80 6C 03 30		      SUB BYTE PTR [SI+3], 30H
+ 0034  B1 04			      MOV CL, 4
+ 0036  D2 44 03			      ROL BYTE PTR [SI+3], CL
+ 0039  D3 4C 02			      ROR WORD PTR [SI+2], CL
+ 003C  8A 44 03			      MOV AL, [SI+3]		;FETCH FIRST BCD NUMBER
+ 003F  8A D8			      MOV BL, AL		;STORE CHECK AMT IN BL
+ 0041  B4 09			      MOV AH, 09H
+ 0043  BA 0333 R		      MOV DX, OFFSET CHECKAMT
+ 0046  CD 21			      INT 21H
+ 0048  5A			      POP DX
+ 0049  B8 00CA			      MOV AX, [0202]		;GET ADDRESS OF DATA SEGMENT
+ 004C  8E D8			      MOV DS, AX		;AND STORE IN DS
+ 004E  8D 16 0202 R		      LEA DX, BUFF		;POINT DX AT INPUT BUFFER
+ 0052  B4 0A			      MOV AH, 0AH		;DOS FUNCTION 0AH
+ 0054  8B F2			      MOV SI, DX		;POINT SI AT INPUT BUFFER
+ 0056  C6 04 03			      MOV BYTE PTR [SI], 3H	;3 BYTE BUFFER
+ 0059  CD 21			      INT 21H			;GET THE TWO NUMBER
+ 005B  B4 0E			      MOV AH, 0EH		;BIOS VIDEO SERVICE
+ 005D  B0 0A			      MOV AL, 0AH		;ASCII LINE FEED
+ 005F  CD 10			      INT 10H
+ 0061  80 6C 02 30		      SUB BYTE PTR [SI+2], 30H	;COVERT EACH DIGIT TO BCD
+ 0065  80 6C 03 30		      SUB BYTE PTR [SI+3], 30H
+ 0069  B1 04			      MOV CL, 4
+ 006B  D2 44 03			      ROL BYTE PTR [SI+3], CL
+ 006E  D3 4C 02			      ROR WORD PTR [SI+2], CL
+ 0071  8A 44 03			      MOV AL, [SI+3]		;FETCH SECOND BCD NUMBER
+ 0074  38 C3			FCN:  CMP BL, AL		;COMPARE CHECK AMT TO BALANCE AMT
+ 0076  7F 2B			      JG OVERDRAFT		;JUMP TO OVERDRAFT FUNCTION IF CHECK IS GREATER THAN BALANCE
+ 0078  2A D8			      SUB BL, AL		;SUBTRACT CHECK AMT FROM BALANCE AFTER OVERDRAFT ADDED
+ 007A  27			      DAA			;KEEP RESULT IN DECIMAL
+				      ;MOV BH, BL		;SAVE RESULT
+ 007B  73 05			      JNC IIIB			;JUMP IF NO CARRY
+ 007D  B0 01			      MOV AL, 1 		;IF THERE IS A CARRY, ADD 1 TO AL
+ 007F  E8 0034			      CALL DSPY 		;CALL DISPLAY FUNCTION
+ 0082  BA 03D0 R		IIIB: MOV DX, OFFSET NEWBALANCE
+ 0085  CD 21			      INT 21H
+ 0087  8A C3			      MOV AL, BL
+ 0089  E8 002A			      CALL DSPY
+				      ;MOV AH, 09H
+				      ;MOV DX, OFFSET LOOPAGAIN
+				      ;INT 21H
+ 008C  B4 00			      MOV AH, 00H	    ;READ IN A CHARACTER
+ 008E  CD 16			      INT 16H		    ;CALL DOS
+ 0090  8A D8			      MOV BL, AL
+ 0092  B4 0E			      MOV AH, 0EH
+ 0094  CD 10			      INT 10H
+ 0096  8A C3			      MOV AL, BL
+ 0098  3C 5A			      CMP AL, 5AH	    ;COMPARE AL TO 'Y'
+ 009A  75 03 E9 FF61		      JZ MAIN
+ 009F  B4 4C			      MOV AH, 4CH
+ 00A1  CD 21			      INT 21H
+ 00A3				OVERDRAFT PROC
+ 00A3  80 C3 20			    ADD	BL, 20H
+ 00A6  EB CC			    JMP FCN
+ 00A8  C3			    RET
+ 00A9				OVERDRAFT ENDP
+				;========================================================
+ 00A9				CLEARSCREEN PROC
+ 00A9  B8 0002			    MOV AX, 0002H
+ 00AC  CD 10			    INT 10H
+ 00AE  BA 0000			    MOV DX, 0000H
+ 00B1  B7 00			    MOV BH, 0H
+ 00B3  CD 10			    INT 10H
+ 00B5  C3			    RET
+ 00B6				CLEARSCREEN ENDP
+				;========================================================
+ 00B6				DSPY PROC	;DISPLAY RESULT TO THE SCREEN
+ 00B6  8A D8			     MOV BL, AL
+ 00B8  24 F0			     AND AL, 0F0H
+ 00BA  B1 04			     MOV CL, 4
+ 00BC  D2 C8			     ROR AL, CL
+ 00BE  04 30			     ADD AL, 30H
+ 00C0  B4 0E			     MOV AH, 0EH
+ 00C2  CD 10			     INT 10H
+ 00C4  8A C3			     MOV AL, BL
+ 00C6  24 0F			     AND AL, 0FH
+ 00C8  04 30			     ADD AL, 30H
+ 00CA  CD 10			     INT 10H
+ 00CC  C3			RET 
+ 00CD				DSPY ENDP
+				;========================================================
+				ORG 0300H
+ 0300 50 4C 45 41 53 45		BALANCEAMT DB "PLEASE ENTER THE CURRENT BALANCE IN YOUR ACCOUNT", 0DH, 0AH, 24H
+       20 45 4E 54 45 52
+       20 54 48 45 20 43
+       55 52 52 45 4E 54
+       20 42 41 4C 41 4E
+       43 45 20 49 4E 20
+       59 4F 55 52 20 41
+       43 43 4F 55 4E 54
+       0D 0A 24
+ 0333 50 4C 45 41 53 45		CHECKAMT DB "PLEASE ENTER THE CHECK AMOUNT", 0DH, 0AH, 24H
+       20 45 4E 54 45 52
+       20 54 48 45 20 43
+       48 45 43 4B 20 41
+       4D 4F 55 4E 54 0D
+       0A 24
+ 0353 57 45 4C 43 4F 4D		WELCOME DB "WELCOME TO JIAOJING'S BANKING SYSTEM", 0DH, 0AH, 24H
+       45 20 54 4F 20 4A
+       49 41 4F 4A 49 4E
+       47 27 53 20 42 41
+       4E 4B 49 4E 47 20
+       53 59 53 54 45 4D
+       0D 0A 24
+ 037A 50 4C 45 41 53 45		PINMSG DB "PLEASE ENTER YOU 6 DIGIT PASSWORD", 0DH, 0AH, 24H
+       20 45 4E 54 45 52
+       20 59 4F 55 20 36
+       20 44 49 47 49 54
+       20 50 41 53 53 57
+       4F 52 44 0D 0A 24
+ 039E 44 4F 20 59 4F 55		LOOPAGAIN DB "DO YOU WISH TO HAVE ANOTHER TRANSACTION? (Y/N):", 0DH, 0AH, 24H
+       20 57 49 53 48 20
+       54 4F 20 48 41 56
+       45 20 41 4E 4F 54
+       48 45 52 20 54 52
+       41 4E 53 41 43 54
+       49 4F 4E 3F 20 28
+       59 2F 4E 29 3A 0D
+       0A 24
+ 03D0 59 4F 55 52 20 43		NEWBALANCE DB "YOUR CURRENT BALANCE IS : ", 0DH, 0AH,13H,10H, 24H
+       55 52 52 45 4E 54
+       20 42 41 4C 41 4E
+       43 45 20 49 53 20
+       3A 20 0D 0A 13 10
+       24
+ 03EF				CSEG ENDS
+				END MAIN
+Microsoft (R) Macro Assembler Version 6.14.8444		    11/05/02 21:13:30
+BCD_BOOK.ASM						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+CSEG . . . . . . . . . . . . . .	16 Bit	 03EF	  Para	  Private 'CODE'	
+DSEG . . . . . . . . . . . . . .	16 Bit	 0205	  Para	  Private 
+SSEG . . . . . . . . . . . . . .	16 Bit	 0020	  Para	  Stack	  
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+CLEARSCREEN  . . . . . . . . . .	P Near	 00A9	  CSEG	Length= 000D Public
+DSPY . . . . . . . . . . . . . .	P Near	 00B6	  CSEG	Length= 0017 Public
+OVERDRAFT  . . . . . . . . . . .	P Near	 00A3	  CSEG	Length= 0006 Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+BALANCEAMT . . . . . . . . . . .	Byte	 0300	  CSEG	
+BUFF . . . . . . . . . . . . . .	Byte	 0202	  DSEG	
+CHECKAMT . . . . . . . . . . . .	Byte	 0333	  CSEG	
+FCN  . . . . . . . . . . . . . .	L Near	 0074	  CSEG	
+IIIB . . . . . . . . . . . . . .	L Near	 0082	  CSEG	
+LOOPAGAIN  . . . . . . . . . . .	Byte	 039E	  CSEG	
+MAIN . . . . . . . . . . . . . .	L Near	 0000	  CSEG	
+NEWBALANCE . . . . . . . . . . .	Byte	 03D0	  CSEG	
+PINMSG . . . . . . . . . . . . .	Byte	 037A	  CSEG	
+WELCOME  . . . . . . . . . . . .	Byte	 0353	  CSEG	
+
+	   0 Warnings
+	   0 Errors

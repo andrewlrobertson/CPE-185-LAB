@@ -1,0 +1,30 @@
+Page 58,132
+Title MASMLab
+;************************
+;* *
+;* MASM Hello *
+;* *
+;************************
+
+cseg segment 'code'
+assume cs:cseg, ds:cseg, ss:cseg, es:cseg
+
+		org 100h
+
+start: 	
+
+				MOV DX, offset input_txt 	;The immediate value is the location the keyoard input will be stored
+				MOV AH, 0Ah 			;The 0A is the operation to collect keyboard input
+				INT 21h 			;Main DOS API Call
+
+		done: 		mov ah, 4ch
+				int 21h
+
+				org 200h
+
+Hello 		db "Hello World", 20h, 20h, "$"
+Num_msg 	db 30h,13,10, 36
+Input_txt	db 2
+
+cseg ends
+end start

@@ -1,0 +1,16 @@
+e 100
+B9 0A 00 B4 09 BA 00 02 CD 21 BA 0E 02 CD 21 FE 06 0E 02 E0 F0 B4 4C CD 20
+
+e 200
+48 65 6C 6C 6F 20 57 6F 72 6C 64 20 20 24
+
+e 20E
+30 0D 0A 24
+
+
+
+
+
+Given code mixed up little / big endian and gave infinite loop
+swapped bytes that were memory refrences to fix. Proved initial
+theory was correct. Memory for byte ptr needs to be reset

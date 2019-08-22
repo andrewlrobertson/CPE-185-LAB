@@ -1,0 +1,414 @@
+;Hand assembled code
+
+e 100
+C7 C2 06 02 C6 C4 09 CD
+
+e 108
+21 B6 20 8A 26 04 02 B2
+
+e 110
+00 A0 05 02 28 C4 7D 06
+
+e 118
+FE C2 00 F4 EB F8 88 26
+
+e 120
+04 02 88 D3 BA 2F 02 B4
+
+e 128
+09 CD 21 B4 02 88 DA 80
+
+e 130
+C2 30 CD 21 CD 20
+
+
+========================================================================================================
+;Config DS locations then check both CS and DS
+
+e 204
+10
+
+e 205
+40
+
+e 206 "Andrew Robertson, x86 Lab Pt.2" 0d 0a "$"
+
+e 22F "Loan distributions: $" 
+
+u 100 135
+
+d 206 250
+
+========================================================================================================
+;Code entered and checked
+
+-e 100
+0F68:0100  DE.C7   E8.C2   45.06   FA.02   AC.C6   AA.C4   3C.09   0D.CD
+0F68:0108  75.21   FA.B6   56.20   8B.8A   36.26   92.04   DE.02   89.B2
+0F68:0110  4C.00   FE.A0   5E.05   8E.02   06.28   08.C4   D3.7D   26.06
+0F68:0118  80.FE   3E.C2   43.00   04.F4   34.EB   00.F8   57.88   0F.26
+0F68:0120  BA.04   42.02   86.88   E9.D3   65.BA   FE.2F   BF.02   81.B4
+0F68:0128  00.09   8B.CD   36.21   92.B4   DE.02   8B.88   44.DA   FE.80
+0F68:0130  BE.C2   C6.30   DB.CD   8B.21   74.CD   09.20
+-
+-e 204
+0F68:0204  FE.10
+-
+-e 205
+0F68:0205  06.40
+-
+-e 206 "Andrew Robertson, x86 Lab Pt.2" 0d 0a "$"
+-
+-e 22F "Loan distributions: $"
+-
+-u 100 135
+0F68:0100 C7C20602      MOV     DX,0206		;Copy value of the message string location into DX
+0F68:0104 C6C409        MOV     AH,09		;Copy code for outputting string via INT 21 into AH
+0F68:0107 CD21          INT     21		;Print stored string to standard out
+0F68:0109 B620          MOV     DH,20		;Copy loan value of 20h into DH
+0F68:010B 8A260402      MOV     AH,[0204]	;Copy value stored in memory location 0204 to AH
+0F68:010F B200          MOV     DL,00		;Copy counter value of 00h into DL
+0F68:0111 A00502        MOV     AL,[0205]	;Copy value stored in memory location 0205 to AL
+0F68:0114 28C4          SUB     AH,AL		;Subtract Al from AH and store result to AH
+0F68:0116 7D06          JGE     011E		;If AH is positive, jump to memory location 011E
+0F68:0118 FEC2          INC     DL		;AH is negative, increment loan counter first...
+0F68:011A 00F4          ADD     AH,DH		;...then provide loan, this order will provide accurate flags for JGE
+0F68:011C EBF8          JMP     0116		;jump to JGE to check if AH is positive now
+0F68:011E 88260402      MOV     [0204],AH	;AH is positive, store this value in memory location 0204
+0F68:0122 88D3          MOV     BL,DL		;Save the counter value before loading message location into DX
+0F68:0124 BA2F02        MOV     DX,022F		;Copy value of the message string location into DX
+0F68:0127 B409          MOV     AH,09		;Copy code for outputting string via INT 21 into AH
+0F68:0129 CD21          INT     21		;Print stored string to standard out
+0F68:012B B402          MOV     AH,02		;Copy code for outputting single character into AH for INT 21
+0F68:012D 88DA          MOV     DL,BL		;Copy counter value back into DL to be output by INT 21
+0F68:012F 80C230        ADD     DL,30		;Convert counter value to its ASCII representation (will only work for 0-9)
+0F68:0132 CD21          INT     21		;Display single character
+0F68:0134 CD20          INT     20		;Terminate program
+
+-d 206 250
+0F68:0200                    41 6E-64 72 65 77 20 52 6F 62         Andrew Rob
+0F68:0210  65 72 74 73 6F 6E 2C 20-78 38 36 20 4C 61 62 20   ertson, x86 Lab
+0F68:0220  50 74 2E 32 0D 0A 24 0D-75 02 88 04 89 36 E3 4C   Pt.2..$.u....6.L
+0F68:0230  6F 61 6E 20 64 69 73 74-72 69 62 75 74 69 6F 6E   oan distribution
+0F68:0240  73 3A 20 24 03 00 3C 0D-C3 AC E8 04 F9 75 04 3C   s: $..<......u.<
+0F68:0250  3B    
+
+
+========================================================================================================
+
+;Multi-loop trace      ;Multi-loop trace      ;Multi-loop trace      ;Multi-loop trace      ;Multi-loop trace
+
+-r
+AX=0000  BX=0000  CX=0000  DX=0000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0100   NV UP EI PL NZ NA PO NC
+0F68:0100 C7C20602      MOV     DX,0206
+-t
+
+AX=0000  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0104   NV UP EI PL NZ NA PO NC
+0F68:0104 C6C409        MOV     AH,09
+-t
+
+AX=0900  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0107   NV UP EI PL NZ NA PO NC
+0F68:0107 CD21          INT     21
+-r ip
+IP 0107
+:109
+-r
+AX=0900  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0109   NV UP EI PL NZ NA PO NC
+0F68:0109 B620          MOV     DH,20
+-t
+
+AX=0900  BX=0000  CX=0000  DX=2006  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=010B   NV UP EI PL NZ NA PO NC
+0F68:010B 8A260402      MOV     AH,[0204]                          DS:0204=10
+-t
+
+AX=1000  BX=0000  CX=0000  DX=2006  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=010F   NV UP EI PL NZ NA PO NC
+0F68:010F B200          MOV     DL,00
+-t
+
+AX=1000  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0111   NV UP EI PL NZ NA PO NC
+0F68:0111 A00502        MOV     AL,[0205]                          DS:0205=40
+-t
+
+AX=1040  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0114   NV UP EI PL NZ NA PO NC
+0F68:0114 28C4          SUB     AH,AL
+-t
+
+AX=D040  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0116   NV UP EI NG NZ NA PO CY
+0F68:0116 7D06          JGE     011E
+-t
+
+AX=D040  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0118   NV UP EI NG NZ NA PO CY
+0F68:0118 FEC2          INC     DL
+-t
+
+AX=D040  BX=0000  CX=0000  DX=2001  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011A   NV UP EI PL NZ NA PO CY
+0F68:011A 00F4          ADD     AH,DH
+-t
+
+AX=F040  BX=0000  CX=0000  DX=2001  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011C   NV UP EI NG NZ NA PE NC
+0F68:011C EBF8          JMP     0116
+-t
+
+AX=F040  BX=0000  CX=0000  DX=2001  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0116   NV UP EI NG NZ NA PE NC
+0F68:0116 7D06          JGE     011E
+-t
+
+AX=F040  BX=0000  CX=0000  DX=2001  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0118   NV UP EI NG NZ NA PE NC
+0F68:0118 FEC2          INC     DL
+-t
+
+AX=F040  BX=0000  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011A   NV UP EI PL NZ NA PO NC
+0F68:011A 00F4          ADD     AH,DH
+-t
+
+AX=1040  BX=0000  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011C   NV UP EI PL NZ NA PO CY
+0F68:011C EBF8          JMP     0116
+-t
+
+AX=1040  BX=0000  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0116   NV UP EI PL NZ NA PO CY
+0F68:0116 7D06          JGE     011E
+-t
+
+AX=1040  BX=0000  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011E   NV UP EI PL NZ NA PO CY
+0F68:011E 88260402      MOV     [0204],AH                          DS:0204=10
+-t
+
+AX=1040  BX=0000  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0122   NV UP EI PL NZ NA PO CY
+0F68:0122 88D3          MOV     BL,DL
+-t
+
+AX=1040  BX=0002  CX=0000  DX=2002  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0124   NV UP EI PL NZ NA PO CY
+0F68:0124 BA2F02        MOV     DX,022F
+-t
+
+AX=1040  BX=0002  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0127   NV UP EI PL NZ NA PO CY
+0F68:0127 B409          MOV     AH,09
+-t
+
+AX=0940  BX=0002  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0129   NV UP EI PL NZ NA PO CY
+0F68:0129 CD21          INT     21
+-r ip
+IP 0129
+:12b
+-r
+AX=0940  BX=0002  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012B   NV UP EI PL NZ NA PO CY
+0F68:012B B402          MOV     AH,02
+-t
+
+AX=0240  BX=0002  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012D   NV UP EI PL NZ NA PO CY
+0F68:012D 88DA          MOV     DL,BL
+-t
+
+AX=0240  BX=0002  CX=0000  DX=0202  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012F   NV UP EI PL NZ NA PO CY
+0F68:012F 80C230        ADD     DL,30
+-t
+
+AX=0240  BX=0002  CX=0000  DX=0232  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0132   NV UP EI PL NZ NA PO NC
+0F68:0132 CD21          INT     21
+-r ip
+IP 0132
+:134
+-r
+AX=0240  BX=0002  CX=0000  DX=0232  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0134   NV UP EI PL NZ NA PO NC
+0F68:0134 CD20          INT     20
+-g
+
+Program terminated normally
+
+;console output
+
+-g
+Andrew Robertson, x86 Lab Pt.2
+Loan distributions: 2
+Program terminated normally
+
+
+========================================================================================================
+
+;C Style representation       ;C Style representation       ;C Style representation       ;C Style representation
+
+#include<stdio.h>
+
+int main() {
+   char* start_msg = "Andrew Robertson, x86 Lab Pt.2";
+   char* end_msg = "Loan distributions: ";
+   int debit = 0x10;
+   int cost = 0x40;
+   int AH, AL, BL, DH, DL;
+   
+   printf("%s \n",start_msg);
+   
+   DH = 0x20;
+   AH = debit;
+   DL = 0;
+   AL = cost;
+   AH -= AL;
+   
+   while(AH < 0){
+       DL++;
+       AH += DH;
+   }
+   debit = AH;
+   BL = DL;
+   
+   printf("%s",end_msg);
+   DL = BL;
+   printf("%d \n",DL);
+}
+
+;console output
+Andrew Robertson, x86 Lab Pt.2 
+
+Loan distributions: 2
+
+
+========================================================================================================
+
+;No-loop trace    ;No-loop trace    ;No-loop trace    ;No-loop trace    ;No-loop trace    ;No-loop trace    
+
+-e 204
+0F68:0204  FE.40
+-
+-e 205
+0F68:0205  06.10
+-
+-e 206 "Andrew Robertson, x86 Lab Pt.2" 0d 0a "$"
+-
+-e 22F "Loan distributions: $"
+-r
+AX=0000  BX=0000  CX=0000  DX=0000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0100   NV UP EI PL NZ NA PO NC
+0F68:0100 C7C20602      MOV     DX,0206
+-t
+
+AX=0000  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0104   NV UP EI PL NZ NA PO NC
+0F68:0104 C6C409        MOV     AH,09
+-t
+
+AX=0900  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0107   NV UP EI PL NZ NA PO NC
+0F68:0107 CD21          INT     21
+-r ip
+IP 0107
+:109
+-r
+AX=0900  BX=0000  CX=0000  DX=0206  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0109   NV UP EI PL NZ NA PO NC
+0F68:0109 B620          MOV     DH,20
+-t
+
+AX=0900  BX=0000  CX=0000  DX=2006  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=010B   NV UP EI PL NZ NA PO NC
+0F68:010B 8A260402      MOV     AH,[0204]                          DS:0204=40
+-t
+
+AX=4000  BX=0000  CX=0000  DX=2006  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=010F   NV UP EI PL NZ NA PO NC
+0F68:010F B200          MOV     DL,00
+-t
+
+AX=4000  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0111   NV UP EI PL NZ NA PO NC
+0F68:0111 A00502        MOV     AL,[0205]                          DS:0205=10
+-t
+
+AX=4010  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0114   NV UP EI PL NZ NA PO NC
+0F68:0114 28C4          SUB     AH,AL
+-t
+
+AX=3010  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0116   NV UP EI PL NZ NA PE NC
+0F68:0116 7D06          JGE     011E
+-t
+
+AX=3010  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=011E   NV UP EI PL NZ NA PE NC
+0F68:011E 88260402      MOV     [0204],AH                          DS:0204=40
+-t
+
+AX=3010  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0122   NV UP EI PL NZ NA PE NC
+0F68:0122 88D3          MOV     BL,DL
+-t
+
+AX=3010  BX=0000  CX=0000  DX=2000  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0124   NV UP EI PL NZ NA PE NC
+0F68:0124 BA2F02        MOV     DX,022F
+-t
+
+AX=3010  BX=0000  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0127   NV UP EI PL NZ NA PE NC
+0F68:0127 B409          MOV     AH,09
+-t
+
+AX=0910  BX=0000  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0129   NV UP EI PL NZ NA PE NC
+0F68:0129 CD21          INT     21
+-r ip
+IP 0129
+:12b
+-r
+AX=0910  BX=0000  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012B   NV UP EI PL NZ NA PE NC
+0F68:012B B402          MOV     AH,02
+-t
+
+AX=0210  BX=0000  CX=0000  DX=022F  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012D   NV UP EI PL NZ NA PE NC
+0F68:012D 88DA          MOV     DL,BL
+-t
+
+AX=0210  BX=0000  CX=0000  DX=0200  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=012F   NV UP EI PL NZ NA PE NC
+0F68:012F 80C230        ADD     DL,30
+-t
+
+AX=0210  BX=0000  CX=0000  DX=0230  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0132   NV UP EI PL NZ NA PE NC
+0F68:0132 CD21          INT     21
+-r ip
+IP 0132
+:134
+-r
+AX=0210  BX=0000  CX=0000  DX=0230  SP=FFEE  BP=0000  SI=0000  DI=0000
+DS=0F68  ES=0F68  SS=0F68  CS=0F68  IP=0134   NV UP EI PL NZ NA PE NC
+0F68:0134 CD20          INT     20
+-g
+
+Program terminated normally
+
+;console output
+
+-g
+Andrew Robertson, x86 Lab Pt.2
+Loan distributions: 0
+Program terminated normally

@@ -1,0 +1,58 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/01/02 12:41:38
+Prog51							     Page 1 - 1
+
+
+					Page 58,132
+					Title Prog51
+				;************************
+				;* *
+				;* Program 5.1 *
+				;* *
+				;************************
+
+ 0000				cseg segment 'code'
+				assume cs:cseg, ds:cseg, ss:cseg, es:cseg
+
+					org 100h
+ 0100  B8 0002			start:	mov     ax,0002h        ;BIOS service 0, video mode 2
+ 0103  CD 10				int     10h             ;Set video mode and clear screen
+ 0105  B4 02				mov     ah,2h           ;BIOS service 2
+ 0107  BA 0A00				mov     dx,0a00h        ;Row 10, column 0
+ 010A  B7 00				mov     bh,0h           ;Page 0
+ 010C  CD 10				int     10h             ;Position cursor
+ 010E  B8 0E00				mov     ax,0e00h        ;BIOS service 0E, first character 0
+ 0111  CD 10			again:	int     10h             ;Print character
+ 0113  FE C0				inc     al              ;Next
+ 0115  3C 80				cmp     al,80h          ;Done?
+ 0117  75 F8				jnz     again           ;No: loop again
+ 0119  B4 4C				mov	ah, 4CH         ;Yes: back to DOS
+ 011B  CD 21				int     21h             ;
+
+ 011D				cseg ends
+				end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/01/02 12:41:38
+Prog51							     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 011D	  Para	  Private 'CODE'	
+Microsoft (R) Macro Assembler Version 6.14.8444		    10/01/02 12:41:38
+Prog51							     Symbols 3 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+again  . . . . . . . . . . . . .	L Near	 0111	  cseg	
+start  . . . . . . . . . . . . .	L Near	 0100	  cseg	
+
+	   0 Warnings
+	   0 Errors

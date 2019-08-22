@@ -1,0 +1,119 @@
+TITLE     	BCDEX  (EXE)   ASCII TO BCD CONVERSION AND ADDITION
+PAGE 	60,132
+
+
+;---------------------------------------------------------------;
+;								;
+;	This is an example program of BCD Addition		;
+;	Two numbers in ASCII are converted to BCD		;
+;	Added with the result in BCD, and then converted	;
+;	to ASCII.   						;
+;	 							;
+;								;
+;---------------------------------------------------------------;
+
+
+.MODEL SMALL
+
+.STACK 64
+
+;--------------
+.DATA
+   NUM1_ASC 	DB 		'0649147816'
+             		ORG 	0010H
+   NUM2_ASC 	DB		'0072687188'
+             		ORG	0020H
+   NUM1_BCD	DB		5 DUP (?)
+             		ORG	0030H
+   NUM2_BCD	DB		5 DUP (?)
+             		ORG	0040H
+   Result_ADD 	DB		5 DUP (?)
+             		ORG	0050H
+   Result_ASC 	DB		10 DUP (?)
+
+
+;--------------
+.CODE
+MAIN       PROC    FAR
+           MOV     AX,@DATA
+           MOV     DS,AX
+           MOV     BX,OFFSET NUM1_ASC      ;BX points to first ASCII data
+           MOV     DI,OFFSET NUM1_BCD      ;DI points to first BCD data
+           MOV     CX,10                   ;CX holds number bytes to convert
+           CALL    CONV_BCD                ;convert ASCII to BCD
+           MOV     BX,OFFSET NUM2_ASC      ;BX points to second ASCII data
+           MOV     DI,OFFSET NUM2_BCD      ;DI points to second BCD data
+           MOV     CX,10                   ;CX holds number bytes to convert
+           CALL    CONV_BCD                ;convert ASCII to BCD
+           CALL    BCD_ADD                 ;add the BCD operands
+           MOV     SI,OFFSET Result_ADD    ;SI points to BCD result
+           MOV     DI,OFFSET Result_ASC    ;DI points to ASCII result
+           MOV     CX,05                   ;CX holds count for convert
+           CALL    CONV_ASC                ;convert result to ASCII
+           MOV     AH,4CH
+           INT     21H                     ;go back to DOS
+MAIN       ENDP
+
+
+;---------------
+;THIS SUBROUTINE CONVERTS ASCII TO PACKED BCD
+
+CONV_BCD   PROC
+AGAIN:     MOV     AX,[BX] ;BX=pointer for ASCII data
+           XCHG    AH,AL
+           AND     AX,0F0FH        ;mask ASCII 3s
+           PUSH    CX              ;save the counter
+           MOV     CL,4            ;shift AH left 4 bits
+           SHL     AH,CL           ;  to get ready for packing
+           OR      AL,AH           ;combine to make packed BCD
+           MOV     [DI],AL         ;DI=pointer for BCD data          
+           ADD     BX,2            ;point to next 2 ASCII bytes
+           INC     DI              ;point to next BCD data
+           POP     CX              ;restore loop counter
+           LOOP    AGAIN
+           RET
+CONV_BCD   ENDP
+
+
+
+;---------------
+BCD_ADD   PROC
+          MOV    BX,OFFSET NUM1_BCD     ;BX=pointer for operand 1
+          MOV    DI,OFFSET NUM2_BCD     ;DI=pointer for operand 2
+          MOV    SI,OFFSET Result_ADD     ;SI=pointer for sum   
+          MOV    CX,05
+          CLC
+BACK:     MOV    AL,[BX]+4       ;get next byte of operand 1
+          ADC    AL,[DI]+4       ;add next byte of operand 2
+          DAA                    ;correct for BCD addition
+          MOV    [SI] +4,AL      ;save sum   
+          DEC    BX              ;point to next byte of operand 1
+          DEC    DI              ;point to next byte of operand 2
+          DEC    SI              ;point to next byte of sum
+          LOOP   BACK
+          RET
+BCD_ADD   ENDP
+
+
+;---------------
+;THIS SUBROUTINE CONVERTS FROM PACKED BCD TO ASCII
+
+CONV_ASC  PROC
+AGAIN2:   MOV     AL,[SI]         ;SI=pointer for BCD data 
+          MOV     AH,AL           ;duplicate to unpack
+          AND     AX,0F00FH       ;unpack
+          PUSH    CX              ;save counter
+          MOV     CL,04           ;shift right 4 bits to unpack
+          SHR     AH,CL           ;    the upper nibble
+          OR      AX,3030H        ;make it ASCII
+          XCHG    AH,AL           ;swap for ASCII storage convention
+          MOV     [DI],AX         ;store ASCII data          
+          INC     SI              ;point to next BCD data
+          ADD     DI,2            ;point to next ASCII data
+          POP     CX              ;restore loop counter
+          LOOP    AGAIN2
+          RET
+CONV_ASC  ENDP        
+
+
+          END     MAIN

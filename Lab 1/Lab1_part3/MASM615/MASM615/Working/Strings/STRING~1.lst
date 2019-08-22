@@ -1,0 +1,87 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/06/03 12:48:52
+strings_attached					     Page 1 - 1
+
+
+					Page 58, 80
+					Title strings_attached
+
+ 0000				cseg	segment 'code'
+					assume cs:cseg, ds:cseg, es:cseg, ss:cse
+				g
+
+
+					org 100h
+
+ 0100  B4 00			start:	mov ah,0
+ 0102  CD 16				int 16h
+ 0104  8B C8				mov cx,ax
+ 0106  83 E1 0F				and cx, 000fh
+ 0109  B4 0E				mov ah, 0eh
+ 010B  CD 10				int 10h
+ 010D  FC				cld
+ 010E  B8 0E0D				mov ax, 0e0dh
+ 0111  CD 10				int 10h
+ 0113  B8 0E0A				mov ax, 0e0ah
+ 0116  CD 10				int 10h
+ 0118  BE 0200 R			mov si, offset shopa
+ 011B  BF 0209 R			mov di, offset shopb
+ 011E  F3/ A6				repz cmpsb
+ 0120  74 05				jz good
+ 0122  BA 021A R			mov dx, offset notso
+ 0125  EB 03				jmp putout
+
+ 0127  BA 0212 R		good:	mov dx, offset fine
+ 012A  B4 09			putout: mov ah,09
+ 012C  CD 21				int 21h
+ 012E  B4 4C				mov ah, 4ch
+ 0130  CD 21				int 21h
+
+					org 200h
+
+ 0200 53 48 4F 50 50 45		shopa	db "SHOPPER", 20h, 0dh
+       52 20 0D
+
+ 0209 53 48 4F 50 50 49		shopb	db "SHOPPING",0dh
+       4E 47 0D
+
+ 0212 45 51 55 41 4C 0D		fine	db "EQUAL",0dh, 0ah, "$"
+       0A 24
+
+ 021A 4E 4F 54 20 45 51		notso	db "NOT EQUAL", 0dh, 0ah, "$"
+       55 41 4C 0D 0A 24
+
+ 0226				cseg	ends
+					end start
+
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/06/03 12:48:52
+strings_attached					     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 0226	  Para	  Private 'CODE'
+					
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/06/03 12:48:52
+strings_attached					     Symbols 3 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+fine . . . . . . . . . . . . . .	Byte	 0212	  cseg	
+good . . . . . . . . . . . . . .	L Near	 0127	  cseg	
+notso  . . . . . . . . . . . . .	Byte	 021A	  cseg	
+putout . . . . . . . . . . . . .	L Near	 012A	  cseg	
+shopa  . . . . . . . . . . . . .	Byte	 0200	  cseg	
+shopb  . . . . . . . . . . . . .	Byte	 0209	  cseg	
+start  . . . . . . . . . . . . .	L Near	 0100	  cseg	
+
+	   0 Warnings
+	   0 Errors

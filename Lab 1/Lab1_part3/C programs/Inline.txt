@@ -1,0 +1,25 @@
+#include<stdio.h>
+
+int main() {
+   char input [] = "15";
+   int output = 0;
+   printf("Please enter a value in XX format\n");
+   scanf("%s", input);   
+
+   while(input[0] > '0'){
+   __asm__ ( "decl %%eax;\n"
+             "addl $10, %%ebx"
+   : "+a" (input[0]), "+b" (output));   
+   }
+   
+   while(input[1] > '0'){
+   __asm__ ( "decl %%eax;\n"
+             "incl %%ebx"
+   : "+a" (input[1]), "+b" (output));   
+   }
+   
+   for (int x = 1; x <= output; x++){
+     printf("Count: %d\n", x);  
+   }
+   return 0;
+}

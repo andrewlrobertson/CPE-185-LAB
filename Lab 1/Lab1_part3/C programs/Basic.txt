@@ -1,0 +1,11 @@
+#include<stdio.h>
+
+int main() {
+   int count;
+   printf("Please enter a value between 1 and 99 (inclusive)\n");
+   scanf("%d", &count);
+   for (int x = 1; x <= count; x++){
+     printf("Count: %d\n", x);  
+   }
+   return 0;
+}

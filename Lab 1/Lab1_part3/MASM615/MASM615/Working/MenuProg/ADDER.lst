@@ -1,0 +1,466 @@
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 1 - 1
+
+
+					Page	43,132
+					Title	Adder
+
+
+					.286
+
+				;******************************************************
+				;*		 Adder Program			      *
+				;*						      *
+				;* This is an example of an Adder program	      *
+				;*						      *
+				;*						      *
+				;******************************************************
+
+
+
+				;The following equate statements assign constants to the labels shown.
+				;This makes the program more readable and will allow global changes to
+				;the program to be made more easily.
+
+ = 0009				display_message		equ	09h	;DOS INT 21h function 9 (string output)
+ = 0002				video_mode		equ	0002h	;BIOS INT 10h service 0, video mode 2 (80x25)
+ = 000D				cr			equ	0dh	;carriage return
+ = 000A				lf			equ	0ah	;line feed
+ = 0000				get_key 		equ	0	;BIOS INT 16h service 0 (read next keyboard character)
+ = 0071				quit			equ	'q'	;Exit by typing q
+ = 004C				terminate		equ	4ch	;DOS INT 21h function 4ch (terminate with error code)
+ = 000E				write_character 	equ	0eh	;Bios INT 10h service 0eh (write character in TTY mode)
+
+
+				;************************
+				;*     Stack Segment    *
+				;************************
+ 0000				sseg	segment  stack
+ 0000  0064 [				db	100 dup	(?)		;100 bytes for stack
+        00
+       ]
+ 0064				sseg	ends
+
+
+				;************************
+				;*   Data Segment	*
+				;************************
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 2 - 1
+
+
+ 0000				dseg	segment
+
+ 0000 54 68 69 73 20 69		welcome	db	'This is an example Adder Program '
+       73 20 61 6E 20 65
+       78 61 6D 70 6C 65
+       20 41 64 64 65 72
+       20 50 72 6F 67 72
+       61 6D 20
+ 0021  0D 0A 0A 24			db	cr,lf,lf,'$'
+
+ 0025 50 6C 65 61 73 65		instruc db	'Please enter the numbers you would like to add or subtract'
+       20 65 6E 74 65 72
+       20 74 68 65 20 6E
+       75 6D 62 65 72 73
+       20 79 6F 75 20 77
+       6F 75 6C 64 20 6C
+       69 6B 65 20 74 6F
+       20 61 64 64 20 6F
+       72 20 73 75 62 74
+       72 61 63 74
+ 005F  0D 0A				db	cr,lf
+ 0061  20 77 68 65 6E 20		db	' when prompted enter your first number then you will be '
+       70 72 6F 6D 70 74
+       65 64 20 65 6E 74
+       65 72 20 79 6F 75
+       72 20 66 69 72 73
+       74 20 6E 75 6D 62
+       65 72 20 74 68 65
+       6E 20 79 6F 75 20
+       77 69 6C 6C 20 62
+       65 20
+ 0099  0D 0A				db	cr,lf
+ 009B  20 70 72 6F 6D 70		db	' prompted for the second number'
+       74 65 64 20 66 6F
+       72 20 74 68 65 20
+       73 65 63 6F 6E 64
+       20 6E 75 6D 62 65
+       72
+ 00BA  0D 0A				db	cr,lf
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 3 - 1
+
+
+ 00BC  20 74 68 65 20 6E		db	' the numbers can be a maximum of 10 digits each'
+       75 6D 62 65 72 73
+       20 63 61 6E 20 62
+       65 20 61 20 6D 61
+       78 69 6D 75 6D 20
+       6F 66 20 31 30 20
+       64 69 67 69 74 73
+       20 65 61 63 68
+ 00EB  0D 0A				db	cr,lf
+ 00ED  20 50 6C 65 61 73		db	' Please indicate whether you want to add or subtract'
+       65 20 69 6E 64 69
+       63 61 74 65 20 77
+       68 65 74 68 65 72
+       20 79 6F 75 20 77
+       61 6E 74 20 74 6F
+       20 61 64 64 20 6F
+       72 20 73 75 62 74
+       72 61 63 74
+ 0121  0D 0A				db	cr,lf
+ 0123  20 31 3A 20 66 6F		db	' 1: for adding the numbers'
+       72 20 61 64 64 69
+       6E 67 20 74 68 65
+       20 6E 75 6D 62 65
+       72 73
+ 013D  0D 0A				db	cr,lf
+ 013F  20 32 3A 20 66 6F		db	' 2: for subtracting the numbers'
+       72 20 73 75 62 74
+       72 61 63 74 69 6E
+       67 20 74 68 65 20
+       6E 75 6D 62 65 72
+       73
+ 015E  0D 0A				db	cr,lf
+ 0160  20 71 3A 20 20 51		db	' q:  Quit program'
+       75 69 74 20 70 72
+       6F 67 72 61 6D
+ 0171  0D 0A				db	cr,lf
+ 0173  0D 0A 0A 24			db	cr,lf,lf,'$'
+
+ 0177 59 6F 75 72 20 63		uchce	db	'Your choice: $'
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 4 - 1
+
+
+       68 6F 69 63 65 3A
+       20 24
+
+ 0185 00			choice  db 	?	;This location stores the number selected
+
+ 0186 59 6F 75 20 68 61		one_mes	db	'You have gotten to selection addition Program '
+       76 65 20 67 6F 74
+       74 65 6E 20 74 6F
+       20 73 65 6C 65 63
+       74 69 6F 6E 20 61
+       64 64 69 74 69 6F
+       6E 20 50 72 6F 67
+       72 61 6D 20
+ 01B4  0D 0A				db	cr,lf
+ 01B6  20 50 6C 65 61 73		db	' Please press a key'
+       65 20 70 72 65 73
+       73 20 61 20 6B 65
+       79
+ 01C9  0D 0A 0A 24			db	cr,lf,lf,'$'
+
+ 01CD 59 6F 75 20 68 61		two_mes	db	'You have gotten to the subtraction Program '
+       76 65 20 67 6F 74
+       74 65 6E 20 74 6F
+       20 74 68 65 20 73
+       75 62 74 72 61 63
+       74 69 6F 6E 20 50
+       72 6F 67 72 61 6D
+       20
+ 01F8  0D 0A				db	cr,lf
+ 01FA  20 50 6C 65 61 73		db	' Please press a key'
+       65 20 70 72 65 73
+       73 20 61 20 6B 65
+       79
+ 020D  0D 0A 0A 24			db	cr,lf,lf,'$'
+
+ 0211 54 68 61 6E 6B 20		goodbye	db	'Thank you for using this mighty fine Program '
+       79 6F 75 20 66 6F
+       72 20 75 73 69 6E
+       67 20 74 68 69 73
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 5 - 1
+
+
+       20 6D 69 67 68 74
+       79 20 66 69 6E 65
+       20 50 72 6F 67 72
+       61 6D 20
+ 023E  0D 0A 0A 24			db	cr,lf,lf,'$'
+
+
+ 0242				dseg	ends
+
+
+
+
+
+				;************************
+				;      Code Segment     *
+				;************************
+ 0000				cseg	segment 'code'
+				assume	cs:cseg, ss:sseg
+
+ 0000  B8 ---- R		start:	mov	ax,dseg 		;Load DS
+ 0003  8E D8				mov	ds,ax
+
+				;Clear the screen
+ 0005  E8 0037				call clear_screen
+					;mov	ax,video_mode		;BIOS service: set video mode
+					;int	10h
+
+				;Display Menu sign-on message
+ 0008  8D 16 0000 R			lea	dx,welcome		;Point DX at sign-on message
+ 000C  E8 0038				call	show			;Show the message
+
+				;Display the program instructions
+ 000F  8D 16 0025 R			lea	dx,instruc		;Point DX at instructions
+ 0013  E8 0031				call	show			;Show the message
+
+				;Get the user's choice
+ 0016  E8 0035				call get_choice
+
+				;Determine what to do based on user's selection
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 6 - 1
+
+
+ 0019  A0 0185 R			mov al, ds:[choice]
+ 001C  3C 31				cmp al, 31h			;test for choice 1
+ 001E  74 0A				jz one
+ 0020  3C 32				cmp al, 32h			;test for choice 2
+ 0022  74 0B				jz two
+ 0024  3C 71				cmp	al,quit 		;Quit?
+ 0026  74 0C				jz	dos			;Return to DOS
+ 0028  EB D6				jmp start			;Display menu options again
+
+				;Execute choice one
+ 002A  E8 0040			one:	call select_one
+ 002D  EB D1				jmp start
+
+				;Execute choice two
+ 002F  E8 0049			two:	call select_two
+ 0032  EB CC				jmp start
+
+				;Come here to return to DOS	
+ 0034				dos:					;Display Menu Goodbye message
+ 0034  8D 16 0211 R			lea	dx, goodbye		;Point DX at sign-on message
+ 0038  E8 000C				call	show			;Show the message
+ 003B  B4 4C				mov	ah,terminate		;DOS function: terminate
+ 003D  CD 21				int	21h
+
+
+
+
+
+
+				;************************************
+				;*     Procedure Clear Screen	    *
+				;*				    *
+				;* Function: Clears screen by 	    *
+				;*	     setting video mode	    *
+				;* Inputs:   none		    *
+				;* Calls:    DOS INT 10 service 0,  *
+				;	     video mode 2 (80x25)   *
+				;* Modifies:  nothing		    *
+				;				    *
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 7 - 1
+
+
+				;************************************
+
+ 003F				clear_screen	proc
+
+ 003F  60				pusha				;Save all registers
+									;Clear the screen by setting the video mode
+ 0040  B8 0002				mov	ax,video_mode		;BIOS service: set video mode
+ 0043  CD 10				int	10h
+ 0045  61				popa				;Restore registers
+ 0046  C3				ret
+
+ 0047				clear_screen	endp
+
+
+
+				;************************************
+				;*     Procedure Show		    *
+				;*				    *
+				;* Function: Display ASCII message  *
+				;*	     terminated with $	    *
+				;* Inputs:   DX points to message   *
+				;* Calls:    DOS INT 21 service 09H *
+				;* Modifies:  flags		    *
+				;				    *
+				;************************************
+
+ 0047				show	proc
+
+ 0047  60				pusha				;Save all registers
+ 0048  B4 09				mov	ah,display_message	;DOS function: string output
+ 004A  CD 21				int	21h
+ 004C  61				popa				;Restore registers
+ 004D  C3				ret
+
+ 004E				show	endp
+
+
+				;************************************
+				;*     Procedure get_choice	    *
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 8 - 1
+
+
+				;*				    *
+				;* Function: Gets Users choice	    *
+				;*	     terminated with $	    *
+				;* Inputs:   none		    *
+				;* Calls:    DOS INT 16 	    *
+				;* Modifies:  nothing		    *
+				;*				    *
+				;************************************
+
+ 004E				get_choice	proc
+
+ 004E  60				pusha				;Save all registers
+ 004F  8D 16 0177 R			lea	dx,uchce		;Point to message to show users selection
+ 0053  E8 FFF1				call	show			;Show the message
+ 0056  B4 00				mov	ah,get_key		;DOS function: wait for next key press
+ 0058  CD 16				int	16h			;Character to AL
+ 005A  A2 0185 R			mov ds:[choice], al			;store number selected
+ 005D  B4 0E				mov ah, 0eh			;Display number user selected
+ 005F  CD 10				int 10h
+ 0061  B8 0E0D				mov ax, 0e0dh			;Send a CR to the screen 
+ 0064  CD 10				int 10h
+ 0066  B8 0E0A				mov ax, 0e0ah			;Send a LF to the screen 
+ 0069  CD 10				int 10h
+ 006B  61				popa				;Restore registers
+ 006C  C3				ret
+
+ 006D				get_choice	endp
+
+
+
+
+				;************************************
+				;*     Procedure select_one	    *
+				;*				    *
+				;* Function: executes selection one  *
+				;*	        		    *
+				;* Inputs:   none		    *
+				;* Calls:    			    *
+				;	     			    *
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 9 - 1
+
+
+				;* Modifies:  nothing		    *
+				;				    *
+				;************************************
+
+ 006D				select_one	proc
+
+ 006D  60				pusha				;Save all registers
+									;Display select_one message
+ 006E  8D 16 0186 R			lea	dx,one_mes		;Point DX at sign-on message
+ 0072  E8 FFD2				call	show			;Show the message
+ 0075  B4 00				mov	ah,get_key		;wait for any key to be pressed
+ 0077  CD 16				int	16h
+ 0079  61				popa				;Restore registers
+ 007A  C3				ret
+
+ 007B				select_one	endp
+
+
+
+				;************************************
+				;*     Procedure select_two	    *
+				;*				    *
+				;* Function: executes selection two  *
+				;*	        		    *
+				;* Inputs:   none		    *
+				;* Calls:    			    *
+				;	     			    *
+				;* Modifies:  nothing		    *
+				;				    *
+				;************************************
+
+ 007B				select_two	proc
+
+ 007B  60				pusha				;Save all registers
+									;Display select_two message
+ 007C  8D 16 01CD R			lea	dx,two_mes		;Point DX at sign-on message
+ 0080  E8 FFC4				call	show			;Show the message
+ 0083  B4 00				mov	ah,get_key		;wait for any key to be pressed
+ 0085  CD 16				int	16h
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Page 10 - 1
+
+
+ 0087  61				popa				;Restore registers
+ 0088  C3				ret
+
+ 0089				select_two	endp
+
+
+
+ 0089				cseg	ends
+					end	start
+
+
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Symbols 11 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 0089	  Para	  Private 'CODE'	
+dseg . . . . . . . . . . . . . .	16 Bit	 0242	  Para	  Private 
+sseg . . . . . . . . . . . . . .	16 Bit	 0064	  Para	  Stack	  
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Symbols 12 - 1
+
+
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+clear_screen . . . . . . . . . .	P Near	 003F	  cseg	Length= 0008 Public
+get_choice . . . . . . . . . . .	P Near	 004E	  cseg	Length= 001F Public
+select_one . . . . . . . . . . .	P Near	 006D	  cseg	Length= 000E Public
+select_two . . . . . . . . . . .	P Near	 007B	  cseg	Length= 000E Public
+show . . . . . . . . . . . . . .	P Near	 0047	  cseg	Length= 0007 Public
+Microsoft (R) Macro Assembler Version 6.13.7299		    03/25/02 13:21:39
+Adder							     Symbols 13 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+choice . . . . . . . . . . . . .	Byte	 0185	  dseg	
+cr . . . . . . . . . . . . . . .	Number	 000Dh	 
+display_message  . . . . . . . .	Number	 0009h	 
+dos  . . . . . . . . . . . . . .	L Near	 0034	  cseg	
+get_key  . . . . . . . . . . . .	Number	 0000h	 
+goodbye  . . . . . . . . . . . .	Byte	 0211	  dseg	
+instruc  . . . . . . . . . . . .	Byte	 0025	  dseg	
+lf . . . . . . . . . . . . . . .	Number	 000Ah	 
+one_mes  . . . . . . . . . . . .	Byte	 0186	  dseg	
+one  . . . . . . . . . . . . . .	L Near	 002A	  cseg	
+quit . . . . . . . . . . . . . .	Number	 0071h	 
+start  . . . . . . . . . . . . .	L Near	 0000	  cseg	
+terminate  . . . . . . . . . . .	Number	 004Ch	 
+two_mes  . . . . . . . . . . . .	Byte	 01CD	  dseg	
+two  . . . . . . . . . . . . . .	L Near	 002F	  cseg	
+uchce  . . . . . . . . . . . . .	Byte	 0177	  dseg	
+video_mode . . . . . . . . . . .	Number	 0002h	 
+welcome  . . . . . . . . . . . .	Byte	 0000	  dseg	
+write_character  . . . . . . . .	Number	 000Eh	 
+
+	   0 Warnings
+	   0 Errors

@@ -1,0 +1,132 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/22/18 09:02:26
+MASMLab							     Page 1 - 1
+
+
+				Page 58,132
+				Title MASMLab
+				;************************
+				;* *
+				;* MASM Hello *
+				;* *
+				;************************
+
+ 0000				cseg segment 'code'
+				assume cs:cseg, ds:cseg, ss:cseg, es:cseg
+
+						org 100h
+
+ 0100				start: 	
+ 0100  B4 09							mov ah,9			;Ready INT 21 to write string
+ 0102  BA 0209 R		 				mov dx, offset Title_msg	;Ready title adress for INT 21
+ 0105  CD 21							int 21h				;Display "Andrew Robertson" with new
+				 line
+ 0107  BA 021C R		 				mov dx, offset Instruct_msg	;Ready title adress for INT 21
+ 010A  CD 21							int 21h				;Display "Andrew Robertson" with new
+				 line
+ 010C  BA 0208 R						MOV DX, offset input_txt 	;The immediate value is the location
+				 the keyoard input will be stored
+ 010F  B4 0A							MOV AH, 0Ah 			;The 0A is the operation to collect 
+				keyboard input
+ 0111  CD 21							INT 21h 			;Main DOS API Call
+ 0113  8B 1E 020A R						MOV BX, word ptr [Input_txt+2]	;
+ 0117  80 EF 30							SUB BH, 30h			;
+ 011A  80 EB 30							SUB BL, 30h			;
+ 011D  B1 08							MOV CL, 8
+ 011F  D3 CB							ROR BX, CL
+ 0121  B9 0000							MOV CX, 0
+ 0124  B4 09							mov ah,9			;Ready INT 21 to write string
+
+ 0126  80 FF 00			process_count:			CMP BH, 0			;
+ 0129  7E 07							JLE have_target
+ 012B  80 C3 0A							ADD BL, 10
+ 012E  FE CF							DEC BH
+ 0130  EB F4							JMP process_count
+
+ 0132  BA 0200 R		have_target: 			mov dx, offset Count_msg	;Ready title adress for INT 21
+ 0135  CD 21							int 21h				;Display
+ 0137  C6 06 0249 R 30						mov [tens_place], 30h
+ 013C  8A D1							mov dl, cl
+
+ 013E  80 FA 0A			t_place:			cmp dl, 10
+ 0141  7C 0A							JL o_place
+ 0143  80 EA 0A							sub dl, 10
+ 0146  80 06 0249 R 01						add [tens_place], 1
+ 014B  EB F1							JMP t_place
+								
+ 014D  88 16 024B R		o_place:			mov [ones_place], dl
+ 0151  80 06 024B R 30						add [ones_place], 30h
+ 0156  BA 0249 R		 				mov dx, offset Tens_place	;Ready title adress for INT 21
+ 0159  CD 21							int 21h				;Display "Andrew Robertson" with new
+				 line
+ 015B  BA 024B R		 				mov dx, offset Ones_place	;Ready title adress for INT 21
+ 015E  CD 21							int 21h				;Display "Andrew Robertson" with new
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/22/18 09:02:26
+MASMLab							     Page 2 - 1
+
+
+				 line
+ 0160  41							INC CX
+ 0161  3B CB							CMP CX, BX
+ 0163  7C CD							JL have_target
+
+ 0165  B4 4C			done: 				mov ah, 4ch
+ 0167  CD 21							int 21h
+
+								org 200h
+
+ 0200 43 6F 75 6E 74 20		Count_msg 	db "Count",20h,20h,"$"
+       20 24
+ 0208 03			Input_txt	db 3
+ 0209 41 6E 64 72 65 77		Title_msg	db "Andrew Robertson",13,10,36
+       20 52 6F 62 65 72
+       74 73 6F 6E 0D 0A
+       24
+ 021C 50 6C 65 61 73 65		Instruct_msg	db "Please enter a decimal number in XX format",13,10,36
+       20 65 6E 74 65 72
+       20 61 20 64 65 63
+       69 6D 61 6C 20 6E
+       75 6D 62 65 72 20
+       69 6E 20 58 58 20
+       66 6F 72 6D 61 74
+       0D 0A 24
+ 0249 30 24			Tens_place	db 30h,36
+ 024B 30 0D 0A 24		Ones_place	db 30h,13,10,36
+
+ 024F				cseg ends
+				end start
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/22/18 09:02:26
+MASMLab							     Symbols 3 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+cseg . . . . . . . . . . . . . .	16 Bit	 024F	  Para	  Private 'CODE'	
+Microsoft (R) Macro Assembler Version 6.14.8444		    03/22/18 09:02:26
+MASMLab							     Symbols 4 - 1
+
+
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+Count_msg  . . . . . . . . . . .	Byte	 0200	  cseg	
+Input_txt  . . . . . . . . . . .	Byte	 0208	  cseg	
+Instruct_msg . . . . . . . . . .	Byte	 021C	  cseg	
+Ones_place . . . . . . . . . . .	Byte	 024B	  cseg	
+Tens_place . . . . . . . . . . .	Byte	 0249	  cseg	
+Title_msg  . . . . . . . . . . .	Byte	 0209	  cseg	
+done . . . . . . . . . . . . . .	L Near	 0165	  cseg	
+have_target  . . . . . . . . . .	L Near	 0132	  cseg	
+o_place  . . . . . . . . . . . .	L Near	 014D	  cseg	
+process_count  . . . . . . . . .	L Near	 0126	  cseg	
+start  . . . . . . . . . . . . .	L Near	 0100	  cseg	
+t_place  . . . . . . . . . . . .	L Near	 013E	  cseg	
+
+	   0 Warnings
+	   0 Errors
